@@ -1,0 +1,79 @@
+#include <Arduino.h>
+
+
+class sensorData {
+    public:
+    sensorData() {}
+
+    float seData() {
+        float avik=10; //Denne vi endrer for å lese
+        return avik;
+    }
+};
+
+
+//tilstandsmaskinnnn
+float input = 100;
+bool serLinje = false;
+
+float forgjeAvik = 0.0;
+float integral = 0.0;
+float deriverte=0.0;
+
+float K_P = 10;
+float K_I = 10;
+float K_D = 10;
+
+class PID {
+    public:
+
+    PID(){}
+    float P(float K_P,float avik){
+        return K_P*avik; //avik = e(t)
+    }
+    float I(float K_I){
+        return K_I*integral;  //avik != integral(e(t))
+    }
+    float D(float K_D){
+        return K_D*deriverte; //derivert
+    }
+
+    float getPaadrag(float avik) {
+        integral+=avik;
+        float deriverte=avik-forgjeAvik;
+        float paadrag = P(K_P,avik)+I(K_I)+D(K_D);
+        forgjeAvik=avik;
+        return paadrag;
+
+    }
+
+};
+
+
+float PID2(float avik) {
+    integral += avik;
+    float derivative = avik - forgjeAvik;
+    float output = K_P * avik + K_I * integral + K_D * derivative;
+    forgjeAvik = avik;
+    return output;
+}
+
+
+
+
+void setup() {
+// write your initia
+
+}
+
+float flag=0;
+void loop() {
+
+// write your code here
+    //flag = update av flagg
+}
+
+
+
+
+
