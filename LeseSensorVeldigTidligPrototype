@@ -1,0 +1,48 @@
+#include <QTRSensors.h>
+
+QTRSensors qtr;
+
+void setup()
+{
+  Serial.begin(9600); // Start serial communication
+
+  pinMode(7, OUTPUT); // Set D7 as an output
+
+  // Initialize the sensors
+  qtr.setTypeRC(); // or setTypeAnalog()
+  qtr.setSensorPins((const uint8_t[]){A0, A1, A2}, 3);
+
+  // Calibration phase
+  for (uint8_t i = 0; i < 250; i++)
+  {
+    qtr.calibrate();
+    delay(20);
+  }
+
+  Serial.println("Calibration complete!");
+}
+
+void loop()
+{
+  analogWrite(0,HIGH); // VELDIG VELDIG VIKTIG
+  uint16_t sensors[3];
+  
+  // Get calibrated sensor values
+  int16_t position = qtr.readLineBlack(sensors);
+
+  // Print sensor values
+  Serial.print("Sensors: ");
+  for (uint8_t i = 0; i < 3; i++)
+  {
+    Serial.print(sensors[i]);
+    if (i < 2) Serial.print(", ");
+  }
+
+  // Print the line position
+  Serial.print(" | Line Position: ");
+  Serial.println(position);
+
+  digitalWrite(7, HIGH); // Set D7 HIGH
+  
+  delay(100); // small delay to make serial output readable
+}
