@@ -12,7 +12,7 @@ class sensorData {
     qtr.setSensorPins((const uint8_t[]){A0, A1, A2}, 3);
     for (uint8_t i = 0; i < 250; i++)
     {qtr.calibrate();
-        //delay(20);
+        delay(20);
         }
 
     }
@@ -24,7 +24,11 @@ class sensorData {
     }
 
     void update() {
-        analogWrite(0,HIGH); // VELDIG VELDIG , må gjøre det for hver av sensorene
+        analogWrite(A0,HIGH); // VELDIG VELDIG , må gjøre det for hver av sensorene
+        analogWrite(A2,HIGH);
+        
+        //analogWrite(1,HIGH);
+        //analogWrite(2,HIGH);
         uint16_t sensors[size];
         int16_t position = qtr.readLineBlack(sensors);
         for (uint8_t i = 0; i < size; i++)
