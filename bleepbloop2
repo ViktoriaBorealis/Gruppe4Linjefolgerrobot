@@ -6,26 +6,34 @@ QTRSensors qtr;
 
 class sensorData {
     public:
-    int size=3;
+    int size=4;
+    int mostRecentData[4];
     sensorData() {
       qtr.setTypeRC(); // or setTypeAnalog()
-    qtr.setSensorPins((const uint8_t[]){A0, A1, A2}, 3);
+    qtr.setSensorPins((const uint8_t[]){A0, A1, A4, A5}, size);
     for (uint8_t i = 0; i < 250; i++)
     {qtr.calibrate();
-        delay(20);
+        delay(20); //hvis vi ikke har denne så blir den aldri ferdig, kan hende vi kan minke den då
         }
 
     }
 
     float seData() {
         float avik=10; //Denne vi endrer for å lese
-        
+        for (int element: mostRecentData){
+            Serial.print(element);
+            Serial.print(",");
+        }
+        Serial.println(" ");
         return avik;
     }
 
     void update() {
         analogWrite(A0,HIGH); // VELDIG VELDIG , må gjøre det for hver av sensorene
-        analogWrite(A2,HIGH);
+        analogWrite(A1,HIGH);
+
+        analogWrite(A4,HIGH);
+        analogWrite(A5,HIGH);
         
         //analogWrite(1,HIGH);
         //analogWrite(2,HIGH);
@@ -33,10 +41,19 @@ class sensorData {
         int16_t position = qtr.readLineBlack(sensors);
         for (uint8_t i = 0; i < size; i++)
         {
-            Serial.print(sensors[i]);
-            if (i < 2) Serial.print(", ");
+            int threshold = 400;
+            if (sensors[i]<threshold){
+                mostRecentData[i]=1;
+            }
+            else{
+                mostRecentData[i]=0;
+            }
+            //mostRecentData[i]=sensors[i];
+
+            //Serial.print(sensors[i]);
+            //if (i < size-1) Serial.print(", ");
         }
-        Serial.println("");
+        //Serial.println("");
     }
 };
 
@@ -77,5 +94,5 @@ sensorData sensor;
 
 void loop() {
     sensor.update();
-    sensor.seData();
+    auto beep = sensor.seData();
 }
