@@ -6,11 +6,12 @@ QTRSensors qtr;
 
 class sensorData {
     public:
-    int size=4;
-    int mostRecentData[4];
+    int size=5;
+    int mostRecentData[5];
+    int numberthingy[5]={50,25,0,-25,-50};
     sensorData() {
       qtr.setTypeRC(); // or setTypeAnalog()
-    qtr.setSensorPins((const uint8_t[]){D2, D4, D7, D8}, size);
+    qtr.setSensorPins((const uint8_t[]){D2, D4, D9, D7, D8}, size);
     for (uint8_t i = 0; i < 250; i++)
     {qtr.calibrate();
         delay(20); //hvis vi ikke har denne så blir den aldri ferdig, kan hende vi kan minke den då
@@ -19,9 +20,10 @@ class sensorData {
     }
 
     float seData() {
-        float avik=10; //Denne vi endrer for å lese
+        float avik=0; //Denne vi endrer for å lese
         for (int element: mostRecentData){
             Serial.print(element);
+            avik+=element;
             Serial.print(",");
         }
         Serial.println(" ");
@@ -35,13 +37,14 @@ class sensorData {
         digitalWrite(D7,HIGH);
         digitalWrite(D8,HIGH);
         
+        digitalWrite(D9,HIGH);
         //analogWrite(1,HIGH);
         //analogWrite(2,HIGH);
         uint16_t sensors[size];
         int16_t position = qtr.readLineBlack(sensors);
         for (uint8_t i = 0; i < size; i++)
         {
-            /*
+            
             int threshold = 400;
             if (sensors[i]<threshold){
                 mostRecentData[i]=1;
@@ -49,11 +52,15 @@ class sensorData {
             else{
                 mostRecentData[i]=0;
             }
-            */
-            mostRecentData[i]=sensors[i];
+            
+            //mostRecentData[i]=sensors[i];
 
             //Serial.print(sensors[i]);
             //if (i < size-1) Serial.print(", ");
+        }
+        for (int i =0; i<size; i++){
+           
+            mostRecentData[i]=mostRecentData[i]*numberthingy[i];
         }
         //Serial.println("");
     }
@@ -124,4 +131,5 @@ sensorData sensor;
 void loop() {
     sensor.update();
     auto beep = sensor.seData();
+    Serial.print(beep);
 }
