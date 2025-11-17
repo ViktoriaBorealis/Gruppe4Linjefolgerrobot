@@ -148,7 +148,7 @@ float FlagAvik=0;
 void loop() {
     sensor.update();
     if (sensor.checkForAllWhite()){
-        std::array<int,5> last=sensor.getLastLine()
+        std::array<int,5> last=sensor.getLastLine();
         //bassert på hva last sist så så må vi ta en stor sving den veien.
     }
     else{
