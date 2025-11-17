@@ -1,5 +1,5 @@
 #include <Arduino.h>
-
+#include <array>
 #include <QTRSensors.h>
 
 QTRSensors qtr;
@@ -8,7 +8,9 @@ class sensorData {
     public:
     int size=5;
     int mostRecentData[5];
+    std::array<int,5> previousData;
     int numberthingy[5]={50,25,0,-25,-50};
+    bool allWhite=false;
     sensorData() {
       qtr.setTypeRC(); // or setTypeAnalog()
     qtr.setSensorPins((const uint8_t[]){D2, D4, D9, D7, D8}, size);
@@ -21,12 +23,16 @@ class sensorData {
 
     float seData() {
         float avik=0; //Denne vi endrer for å lese
+        allWhite=false;
         for (int element: mostRecentData){
-            Serial.print(element);
+            //Serial.print(element);
+            if (element != 0){
+                allWhite=true;
+            }
             avik+=element;
-            Serial.print(",");
+            //Serial.print(",");
         }
-        Serial.println(" ");
+        //Serial.println(" ");
         return avik;
     }
 
@@ -42,8 +48,12 @@ class sensorData {
         //analogWrite(2,HIGH);
         uint16_t sensors[size];
         int16_t position = qtr.readLineBlack(sensors);
+        for (int j = 0; j<size;j++){
+                previousData[j]=mostRecentData[j];
+            }
         for (uint8_t i = 0; i < size; i++)
         {
+            
             
             int threshold = 400;
             if (sensors[i]<threshold){
@@ -62,7 +72,14 @@ class sensorData {
            
             mostRecentData[i]=mostRecentData[i]*numberthingy[i];
         }
+        
         //Serial.println("");
+    }
+    bool checkForAllWhite(){
+            return allWhite;
+        }
+    std::array<int,5> getLastLine(){
+        return previousData;
     }
 };
 
@@ -122,14 +139,29 @@ float PID2(float avik) {
 void setup() {
     Serial.begin(9600); // Start serial communication
     
-    Serial.println("Calibration complete!");
+    Serial.println("Calibration Comence!");
 }
 
 float flag=0;
 sensorData sensor;
-
+float FlagAvik=0;
 void loop() {
     sensor.update();
-    auto beep = sensor.seData();
-    Serial.print(beep);
+    if (sensor.checkForAllWhite()){
+        std::array<int,5> last=sensor.getLastLine()
+        //bassert på hva last sist så så må vi ta en stor sving den veien.
+    }
+    else{
+        float avik = sensor.seData();
+        float response = PID2(avik);
+
+         Serial.print(avik);
+    Serial.print("; ");
+    Serial.println(response);
+    
+
+    FlagAvik=avik;
+    }
+    
+   
 }
