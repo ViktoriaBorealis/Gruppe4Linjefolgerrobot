@@ -93,7 +93,8 @@ class motor{
 
     }
 
-    void drive(float power){
+    void drive(int power){
+      digitalWrite(stby,HIGH);
          if (forward){
             digitalWrite(dir1,HIGH);
             digitalWrite(dir2,LOW);
@@ -111,7 +112,6 @@ class motor{
     int dir2;
     bool forward=true;
 };
-
 //tilstandsmaskinnnn
 float input = 100;
 bool serLinje = false;
@@ -145,6 +145,10 @@ void setup() {
 float flag=0;
 sensorData sensor;
 float FlagAvik=0;
+
+motor motor1(PC5,PB1,PC8,PC6);
+motor motor2(PC5,PA8,PC9,PB8);
+
 void loop() {
     sensor.update();
     if (sensor.checkForAllWhite()){
