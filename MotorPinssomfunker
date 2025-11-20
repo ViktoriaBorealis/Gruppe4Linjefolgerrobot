@@ -1,0 +1,25 @@
+void setup() {
+  pinMode(PC8, OUTPUT);
+  pinMode(PC6, OUTPUT);
+  pinMode(PC5, OUTPUT);
+
+  pinMode(PC9, OUTPUT);
+  pinMode(PB8, OUTPUT);
+
+  pinMode(PA8, OUTPUT);
+  pinMode(PB1, OUTPUT);
+
+  digitalWrite(PC8, HIGH);  // Setter PC8 høy
+  digitalWrite(PC6, LOW);   // Setter PC6 lav
+  digitalWrite(PC5, HIGH);  // Setter PC5 høy
+  
+  digitalWrite(PC9, HIGH);
+  digitalWrite(PB8, LOW);
+
+  analogWrite(PA8,255);
+  analogWrite(PB1,255);
+}
+
+void loop() {
+  // Ingenting her – verdiene er satt én gang i setup()
+}
