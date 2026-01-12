@@ -16,6 +16,7 @@ class sensorData {
     qtr.setSensorPins((const uint8_t[]){D2, D4, D9, D7, D8}, size);
     for (uint8_t i = 0; i < 250; i++)
     {qtr.calibrate();
+       //Serial.println("Calibratin");
         delay(20); //hvis vi ikke har denne så blir den aldri ferdig, kan hende vi kan minke den då
         }
 
@@ -23,12 +24,14 @@ class sensorData {
 
     float seData() {
         float avik=0; //Denne vi endrer for å lese
-        allWhite=false;
+        allWhite=true;
         for (int element: mostRecentData){
             //Serial.print(element);
             if (element != 0){
-                allWhite=true;
+                allWhite=false;
+                //allWhite=false;
             }
+            //Serial.println(element);
             avik+=element;
             //Serial.print(",");
         }
@@ -65,16 +68,20 @@ class sensorData {
             
             //mostRecentData[i]=sensors[i];
 
-            //Serial.print(sensors[i]);
+            //Serial.println(mostRecentData[i]);
             //if (i < size-1) Serial.print(", ");
         }
         for (int i =0; i<size; i++){
            
             mostRecentData[i]=mostRecentData[i]*numberthingy[i];
+            if (mostRecentData[i] >0){
+                allWhite=false;
+            }
         }
         
         //Serial.println("");
     }
+
     bool checkForAllWhite(){
             return allWhite;
         }
@@ -94,7 +101,15 @@ class motor{
     }
 
     void drive(int power){
+        power=power*directionalMultiplier;
       digitalWrite(stby,HIGH);
+      if (power <0){
+        forward=false;
+        power=power*(-1);
+      }
+      else if (power > 0){
+        forward=true;
+      }
          if (forward){
             digitalWrite(dir1,HIGH);
             digitalWrite(dir2,LOW);
@@ -111,6 +126,7 @@ class motor{
     int dir1;
     int dir2;
     bool forward=true;
+    int directionalMultiplier=1;
 };
 //tilstandsmaskinnnn
 float input = 100;
@@ -120,9 +136,9 @@ float forgjeAvik = 0.0;
 float integral = 0.0;
 float deriverte=0.0;
 
-float K_P = 10;
-float K_I = 10;
-float K_D = 10;
+float K_P = 0.1;
+float K_I = 0.1;
+float K_D = 0.1;
 
 
 float PID2(float avik) {
@@ -130,15 +146,23 @@ float PID2(float avik) {
     float derivative = avik - forgjeAvik;
     float output = K_P * avik + K_I * integral + K_D * derivative;
     forgjeAvik = avik;
+    if (output >=250){
+        output=249;
+    }
+    else if(output <=-250){
+        output=-249;
+    }
     return output;
 }
 
 
 
+motor motor1(PC5,PB1,PC8,PC6); //PB1
+motor motor2(PC5,PB6,PC9,PB8); //PA8
 
 void setup() {
     Serial.begin(9600); // Start serial communication
-    
+    motor2.directionalMultiplier=-1;
     Serial.println("Calibration Comence!");
 }
 
@@ -146,26 +170,29 @@ float flag=0;
 sensorData sensor;
 float FlagAvik=0;
 
-motor motor1(PC5,PB1,PC8,PC6);
-motor motor2(PC5,PA8,PC9,PB8);
 
 void loop() {
+    float response=0;
     sensor.update();
     if (sensor.checkForAllWhite()){
+        Serial.println("All white");
         std::array<int,5> last=sensor.getLastLine();
         //bassert på hva last sist så så må vi ta en stor sving den veien.
     }
     else{
         float avik = sensor.seData();
-        float response = PID2(avik);
+         response = PID2(avik);
 
          Serial.print(avik);
     Serial.print("; ");
     Serial.println(response);
     
 
-    FlagAvik=avik;
+    //FlagAvik=avik;
+    
     }
     
+    motor1.drive(response);
+    motor2.drive(response);
    
 }
