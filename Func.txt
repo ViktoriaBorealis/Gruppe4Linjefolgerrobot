@@ -40,7 +40,7 @@ class sensorData {
     }
 
     void update() {
-        digitalWrite(D2,HIGH); // VELDIG VELDIG , må gjøre det for hver av sensorene
+        digitalWrite(D2,HIGH); // VELDIG VELDIG viktig , må gjøre det for hver av sensorene
         digitalWrite(D4,HIGH);
 
         digitalWrite(D7,HIGH);
@@ -222,7 +222,7 @@ void loop() {
     }
     else{
         float avik = sensor.seData();
-         response = PID2(-avik);
+         response = PID2(-avik); //-avik fordi det er sånn motorene våre er satt IRL
 
         // Serial.print(avik);
     //Serial.print("; ");
@@ -238,3 +238,10 @@ void loop() {
     motor2.drive(response);
    
 }
+
+
+//Issues
+//Enn så lenge så fungerer ikke PID'en nokk til å være hele styresystemet
+//Samt så har vi ikke nokk inputs fra sensoren til å detektere sentrum.
+//Noe som betyr at AllWhite blir kalt oftere enn forventet
+//samtidig som ALLWHite ikke fungerer som forventet, ettersom den bare lar bilen kjøre rett fram, mens den egentlig skal svinge brått.
