@@ -74,10 +74,11 @@ class sensorData {
         }
         for (int i =0; i<size; i++){
            
-            mostRecentData[i]=mostRecentData[i]*numberthingy[i];
-            if (mostRecentData[i] >0){
+           if (mostRecentData[i] >0){
                 allWhite=false;
             }
+            mostRecentData[i]=mostRecentData[i]*numberthingy[i];
+            
         }
         
         //Serial.println("");
@@ -133,15 +134,15 @@ class motor{
          int pwm = power + drivingVariable;
         pwm = constrain(pwm, 0, 255);
         Serial.println(pwm);
-
-         analogWrite(PMW,power+drivingVariable);
+        //HEr er problemet enn så lenge, vi vil at den skal kjøre framover men bare ett av hjulene kjører om gangen. Why
+         analogWrite(PMW,power + drivingVariable);
 
     }
     int stby;
     int PMW;
     int dir1;
     int dir2;
-    float drivingVariable=100;
+    float drivingVariable=255;
     bool forward=true;
     int directionalMultiplier=1;
 };
