@@ -116,13 +116,6 @@ class motor{
     void drive(int power){
         power=power*directionalMultiplier;
       digitalWrite(stby,HIGH);
-      if (power <0){
-        //forward=false;
-        //power=power*(-1); //okay, så planen er nå at den alltid skal kjøre framover og bare svinge med å minke og legge til dingser
-      }
-      else if (power > 0){
-        forward=true;
-      }
          if (forward){
             digitalWrite(dir1,HIGH);
             digitalWrite(dir2,LOW);
@@ -135,14 +128,14 @@ class motor{
         pwm = constrain(pwm, 0, 255);
         Serial.println(pwm);
         //HEr er problemet enn så lenge, vi vil at den skal kjøre framover men bare ett av hjulene kjører om gangen. Why
-         analogWrite(PMW,power + drivingVariable);
+         analogWrite(PMW,pwm);
 
     }
     int stby;
     int PMW;
     int dir1;
     int dir2;
-    float drivingVariable=255;
+    float drivingVariable=200;
     bool forward=true;
     int directionalMultiplier=1;
 };
