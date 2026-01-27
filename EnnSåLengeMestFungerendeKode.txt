@@ -6,15 +6,15 @@ QTRSensors qtr;
 
 class sensorData {
     public:
-    int size=7;
-    int mostRecentData[7];
+    int size=11;
+    int mostRecentData[11];
     float flagFloat=0;
-    int numberthingy[7]={50,25,5,0,-5,-25,-50}; //Midten her burde egentlig være 0, men med få sensorer så kan det gi issue med allWhite funksjonen
+    int numberthingy[11]={50,25,15,8,2,0,-2,-8,-15,-25,-50}; //Midten her burde egentlig være 0, men med få sensorer så kan det gi issue med allWhite funksjonen
     bool allWhite=false;
     sensorData() {
       qtr.setTypeRC(); // or setTypeAnalog()
-    qtr.setSensorPins((const uint8_t[]){D2, D4,D5,D6,D7,D8,D9}, size);
-    //qtr.setSensorPins((const uint8_t[]){D2, D4,D5,A1,D6,A5,D7,D8,D9}, size);
+    //qtr.setSensorPins((const uint8_t[]){D2, D4,D5,D6,D7,D8,D9}, size);
+    qtr.setSensorPins((const uint8_t[]){D2, D4,A1,D5,A0,D6,A5,D7,A4,D8,D9}, size);
     for (uint8_t i = 0; i < 250; i++)
     {qtr.calibrate();
        //Serial.println("Calibratin");
@@ -50,6 +50,9 @@ class sensorData {
         digitalWrite(D9,HIGH);
         digitalWrite(D5,HIGH);
         digitalWrite(D6,HIGH);
+
+        digitalWrite(A0,HIGH);
+        digitalWrite(A5,HIGH);
         //analogWrite(1,HIGH);
         //analogWrite(2,HIGH);
         uint16_t sensors[size];
