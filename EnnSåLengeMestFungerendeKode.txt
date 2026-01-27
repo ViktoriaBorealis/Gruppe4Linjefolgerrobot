@@ -9,11 +9,12 @@ class sensorData {
     int size=7;
     int mostRecentData[7];
     float flagFloat=0;
-    int numberthingy[7]={50,25,1,0,-1,-25,-50}; //Midten her burde egentlig være 0, men med få sensorer så kan det gi issue med allWhite funksjonen
+    int numberthingy[7]={50,25,5,0,-5,-25,-50}; //Midten her burde egentlig være 0, men med få sensorer så kan det gi issue med allWhite funksjonen
     bool allWhite=false;
     sensorData() {
       qtr.setTypeRC(); // or setTypeAnalog()
-    qtr.setSensorPins((const uint8_t[]){D2, D4,D6,D9,D5, D7, D8}, size);
+    qtr.setSensorPins((const uint8_t[]){D2, D4,D5,D6,D7,D8,D9}, size);
+    //qtr.setSensorPins((const uint8_t[]){D2, D4,D5,A1,D6,A5,D7,D8,D9}, size);
     for (uint8_t i = 0; i < 250; i++)
     {qtr.calibrate();
        //Serial.println("Calibratin");
@@ -72,16 +73,20 @@ class sensorData {
             //Serial.println(mostRecentData[i]);
             //if (i < size-1) Serial.print(", ");
         }
+        Serial.println("");
+        
         for (int i =0; i<size; i++){
            
            if (mostRecentData[i] >0){
                 allWhite=false;
             }
             mostRecentData[i]=mostRecentData[i]*numberthingy[i];
+            Serial.print(mostRecentData[i]);
+            Serial.print(",");
             
         }
         
-        //Serial.println("");
+        
     }
 
     bool checkForAllWhite(){
@@ -126,9 +131,12 @@ class motor{
          }
          int pwm = power + drivingVariable;
         pwm = constrain(pwm, 0, 255);
-        Serial.println(pwm);
+        //Serial.println(pwm);
         //HEr er problemet enn så lenge, vi vil at den skal kjøre framover men bare ett av hjulene kjører om gangen. Why
-         analogWrite(PMW,pwm);
+
+        float TOTEST=pwm*0.3;
+        analogWrite(PMW,TOTEST);
+         //analogWrite(PMW,pwm);
 
     }
     int stby;
@@ -178,6 +186,7 @@ motor motor2(PC5,PB6,PC9,PB8); //PA8 //PB6
 void setup() {
     Serial.begin(9600); // Start serial communication
     motor2.directionalMultiplier=-1;
+    //motor1.directionalMultiplier=-1;
     Serial.println("Calibration Comence!");
 }
 
@@ -221,6 +230,9 @@ void loop() {
         response = PID2(-avik);  //-avik fordi det er sånn motorene våre er satt IRL
         motor1.drive(response);
         motor2.drive(response);
+
+        //motor1.drive(50);
+        //motor2.drive(50);
 
         // Serial.print(avik);
     //Serial.print("; ");
