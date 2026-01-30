@@ -84,8 +84,8 @@ class sensorData {
                 allWhite=false;
             }
             mostRecentData[i]=mostRecentData[i]*numberthingy[i];
-            Serial.print(mostRecentData[i]);
-            Serial.print(",");
+            //Serial.print(mostRecentData[i]);
+            //Serial.print(",");
             
         }
         
@@ -137,16 +137,16 @@ class motor{
         //Serial.println(pwm);
         //HEr er problemet enn så lenge, vi vil at den skal kjøre framover men bare ett av hjulene kjører om gangen. Why
 
-        float TOTEST=pwm*0.3;
+        float TOTEST=pwm*0.4;
         analogWrite(PMW,TOTEST);
-         //analogWrite(PMW,pwm);
+        // analogWrite(PMW,pwm);
 
     }
     int stby;
     int PMW;
     int dir1;
     int dir2;
-    float drivingVariable=200;
+    float drivingVariable=150;
     bool forward=true;
     int directionalMultiplier=1;
 };
@@ -212,12 +212,12 @@ void loop() {
             Serial.println(panikkvei);
             if (panikkvei >= 0){
                 //motor kjør en av veiene
-                motor1.panikkSnu(false);
-                motor2.panikkSnu(true);   
-            }
-            else{
                 motor1.panikkSnu(true);
                 motor2.panikkSnu(false);   
+            }
+            else{
+                motor1.panikkSnu(false);
+                motor2.panikkSnu(true);   
             }
             mengdepanikk=0;
         }
