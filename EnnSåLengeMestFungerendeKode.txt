@@ -6,15 +6,15 @@ QTRSensors qtr;
 
 class sensorData {
     public:
-    int size=11;
-    int mostRecentData[11];
+    int size=13;
+    int mostRecentData[13];
     float flagFloat=0;
-    int numberthingy[11]={50,25,15,8,2,0,-2,-8,-15,-25,-50}; //Midten her burde egentlig være 0, men med få sensorer så kan det gi issue med allWhite funksjonen
+    int numberthingy[13]={50,30,25,15,8,2,0,-2,-8,-15,-25,-30,-50}; //Midten her burde egentlig være 0, men med få sensorer så kan det gi issue med allWhite funksjonen
     bool allWhite=false;
     sensorData() {
       qtr.setTypeRC(); // or setTypeAnalog()
     //qtr.setSensorPins((const uint8_t[]){D2, D4,D5,D6,D7,D8,D9}, size);
-    qtr.setSensorPins((const uint8_t[]){D2, D4,A1,D5,A0,D6,A5,D7,A4,D8,D9}, size);
+    qtr.setSensorPins((const uint8_t[]){D13,D11,D9,D8,D7,D6,D5,D4,D3,D2,A0,A1,A2}, size); //A3 og videre er neste rad
     for (uint8_t i = 0; i < 250; i++)
     {qtr.calibrate();
        //Serial.println("Calibratin");
@@ -51,6 +51,9 @@ class sensorData {
         digitalWrite(D5,HIGH);
         digitalWrite(D6,HIGH);
 
+        digitalWrite(D3,HIGH);
+        
+        digitalWrite(PC15,HIGH);
         digitalWrite(A0,HIGH);
         digitalWrite(A5,HIGH);
         //analogWrite(1,HIGH);
@@ -63,30 +66,50 @@ class sensorData {
         {
             
             
-            int threshold = 400;
+            int threshold = 400; //400
             if (sensors[i]<threshold){
                 mostRecentData[i]=1;
             }
             else{
                 mostRecentData[i]=0;
             }
-            
+            /*
+            if (mostRecentData[i] == 1) {
+                if (i < size/2) flagFloat = -1;  // linje til venstre
+                else if (i > size/2) flagFloat = 1; // linje til høyre
+                }
+            */
             //mostRecentData[i]=sensors[i];
 
             //Serial.println(mostRecentData[i]);
             //if (i < size-1) Serial.print(", ");
         }
-        Serial.println("");
-        
+        //Serial.println("");
+        int newAllWHite=0;
+        int zeroCount=0;
         for (int i =0; i<size; i++){
-           
            if (mostRecentData[i] >0){
                 allWhite=false;
             }
+            if (mostRecentData[i]== 0){
+                zeroCount+=1;
+            }
             mostRecentData[i]=mostRecentData[i]*numberthingy[i];
+            newAllWHite+=mostRecentData[i];
             //Serial.print(mostRecentData[i]);
             //Serial.print(",");
             
+        }
+        if (zeroCount<6){
+        if (newAllWHite>0){
+            flagFloat=1;
+        }
+        else if(newAllWHite<0){
+            flagFloat=-1;
+        }
+        }
+        if (newAllWHite==0){
+            allWhite=true;
         }
         
         
@@ -137,7 +160,8 @@ class motor{
         //Serial.println(pwm);
         //HEr er problemet enn så lenge, vi vil at den skal kjøre framover men bare ett av hjulene kjører om gangen. Why
 
-        float TOTEST=pwm*0.4;
+        float TOTEST=pwm*1; //0.4
+        //Serial.println(TOTEST);
         analogWrite(PMW,TOTEST);
         // analogWrite(PMW,pwm);
 
@@ -146,7 +170,7 @@ class motor{
     int PMW;
     int dir1;
     int dir2;
-    float drivingVariable=150;
+    float drivingVariable=255;
     bool forward=true;
     int directionalMultiplier=1;
 };
@@ -158,9 +182,9 @@ float forgjeAvik = 0.0;
 float integral = 0.0;
 float deriverte=0.0;
 
-float K_P = 1.2;
+float K_P = 3.75; 
 float K_I = 0;
-float K_D = 0;
+float K_D = 0.002;
 
 
 float PID2(float avik) {
@@ -183,23 +207,20 @@ float PID2(float avik) {
 
 
 
-motor motor1(PC5,PA6,PC8,PC6); //PB1
-motor motor2(PC5,PB6,PC9,PB8); //PA8 //PB6
+motor motor1(PC5,PB6,PC8,PC6); //PB1 //PA6
+motor motor2(PC5,PA6,PC9,PB8); //PA8 //PB6
 
 void setup() {
-    Serial.begin(9600); // Start serial communication
-    motor2.directionalMultiplier=-1;
-    //motor1.directionalMultiplier=-1;
-    Serial.println("Calibration Comence!");
+    //Serial.begin(9600); // Start serial communication
+    //motor2.directionalMultiplier=-1;
+    motor1.directionalMultiplier=-1;
+    //Serial.println("Calibration Comence!");
 }
 
 float flag=0;
 sensorData sensor;
 float FlagAvik=0;
 
-void panikk(sensorData& sensor,motor& motor1,motor& motor2){
-    
-}
 int mengdepanikk=0;
 void loop() {
     float response=0;
@@ -209,8 +230,8 @@ void loop() {
         //bassert på hva last sist så så må vi ta en stor sving den veien.
         if (mengdepanikk>3){
             float panikkvei=sensor.getFlag();
-            Serial.println(panikkvei);
-            if (panikkvei >= 0){
+            //Serial.println(panikkvei);
+            if (panikkvei > 0){
                 //motor kjør en av veiene
                 motor1.panikkSnu(true);
                 motor2.panikkSnu(false);   
@@ -224,36 +245,11 @@ void loop() {
     }
     else{
         float avik = sensor.seData();
-        if (avik>0){
-            sensor.flagFloat=1;
-        }
-        else if( avik<0){
-            sensor.flagFloat=-1;
-        }
-        response = PID2(-avik);  //-avik fordi det er sånn motorene våre er satt IRL
+        response = PID2(-avik);
         motor1.drive(response);
         motor2.drive(response);
-
-        //motor1.drive(50);
-        //motor2.drive(50);
-
-        // Serial.print(avik);
-    //Serial.print("; ");
-    //Serial.println(response);
-    
-
-    //FlagAvik=avik;
-    
+        
+        // Reset panikkteller når vi ser linjen igjen
+        mengdepanikk = 0;
     }
-    
-    
-    
-   
 }
-
-
-//Issues
-//Enn så lenge så fungerer ikke PID'en nokk til å være hele styresystemet
-//Samt så har vi ikke nokk inputs fra sensoren til å detektere sentrum.
-//Noe som betyr at AllWhite blir kalt oftere enn forventet
-//samtidig som ALLWHite ikke fungerer som forventet, ettersom den bare lar bilen kjøre rett fram, mens den egentlig skal svinge brått.
